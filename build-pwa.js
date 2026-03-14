@@ -7,8 +7,14 @@ const path = require('path');
 
 const sourcePath = path.join(__dirname, '..', 'Combination 3 books', 'Mafaheemintelligent Combined 3 Books.html');
 const outPath = path.join(__dirname, 'index.html');
+const swPath = path.join(__dirname, 'sw.js');
 
 let html = fs.readFileSync(sourcePath, 'utf8');
+
+// Extract version from CACHE_NAME in sw.js for cache-busting registration (stays in sync)
+const swContent = fs.readFileSync(swPath, 'utf8');
+const cacheMatch = swContent.match(/CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
+const swVersion = cacheMatch ? (cacheMatch[1].replace(/^mafaheem-v?/, '') || '1') : '1';
 
 // PWA meta + manifest (after charset, before </head>)
 const pwaHead = `
@@ -46,7 +52,7 @@ const swScript = `
   };
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     window.addEventListener('load', function() {
-      navigator.serviceWorker.register('sw.js').then(function(reg) {
+      navigator.serviceWorker.register('sw.js?v=${swVersion}').then(function(reg) {
         reg.addEventListener('updatefound', function() {
           newWorker = reg.installing;
           newWorker.addEventListener('statechange', function() {

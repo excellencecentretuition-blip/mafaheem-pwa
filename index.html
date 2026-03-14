@@ -1275,7 +1275,7 @@ startSession();
   };
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     window.addEventListener('load', function() {
-      navigator.serviceWorker.register('sw.js').then(function(reg) {
+      navigator.serviceWorker.register('sw.js?v=2.2').then(function(reg) {
         reg.addEventListener('updatefound', function() {
           newWorker = reg.installing;
           newWorker.addEventListener('statechange', function() {
