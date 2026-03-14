@@ -26,6 +26,17 @@
         .how-to-popover::before { content: ''; position: absolute; top: -6px; left: 50%; margin-left: -6px; width: 12px; height: 12px; background: #fff; border-left: 1px solid rgba(44,62,80,0.12); border-top: 1px solid rgba(44,62,80,0.12); transform: rotate(45deg); }
         @keyframes howToFade { from { opacity: 0; transform: translateX(-50%) translateY(-6px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         .how-to-wrap.open .how-to-popover { display: block; }
+        .how-to-backdrop { display: none; }
+        .how-to-wrap.open .how-to-backdrop { display: block; }
+        @media (max-width: 600px) {
+            .how-to-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 9998; cursor: pointer; }
+            .how-to-popover { position: fixed; top: 50%; left: 12px; right: 12px; margin: 0; width: calc(100% - 24px); max-width: none; max-height: 80vh; transform: translateY(-50%); border-radius: 14px; overflow-y: auto; overflow-x: hidden; animation: howToFadeMobile 0.2s ease; padding: 44px 18px 18px; box-sizing: border-box; z-index: 9999; }
+            .how-to-popover::before { display: none; }
+            .how-to-close { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border: none; background: rgba(0,0,0,0.08); color: var(--primary); font-size: 18px; border-radius: 8px; cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center; }
+            .how-to-close:hover { background: rgba(0,0,0,0.12); }
+            @keyframes howToFadeMobile { from { opacity: 0; } to { opacity: 1; } }
+        }
+        .how-to-close { display: none; }
         .how-to-popover strong { display: block; margin: 12px 0 6px; color: var(--primary); font-size: 0.8rem; letter-spacing: 0.3px; }
         .how-to-popover strong:first-child { margin-top: 0; }
         .card { margin-top: 24px; max-width: 600px; width: 100%; min-width: 0; background: var(--card-bg); padding: 32px; border-radius: 24px; box-shadow: 0 4px 6px rgba(30,58,95,0.04), 0 12px 32px rgba(30,58,95,0.08); border: 1px solid rgba(30,58,95,0.06); box-sizing: border-box; }
@@ -96,7 +107,9 @@
         </select>
         <div class="how-to-wrap" id="howToWrap">
             <button type="button" class="how-to-btn" id="howToBtn" title="How to use">ⓘ</button>
+            <div class="how-to-backdrop" onclick="document.getElementById('howToWrap').classList.remove('open')"></div>
             <div class="how-to-popover">
+                <button type="button" class="how-to-close" onclick="document.getElementById('howToWrap').classList.remove('open')" title="Close" aria-label="Close">×</button>
                 <strong>How to use</strong>
                 Pick a book from the dropdown. Type the English meaning of the Arabic word and press <b>Check Answer</b> or <b>Enter</b>.
                 <strong>Session</strong>

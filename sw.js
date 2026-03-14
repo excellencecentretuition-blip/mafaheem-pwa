@@ -1,5 +1,5 @@
 // Bump version when deploying updates so users get fresh content
-const CACHE_NAME = 'mafaheem-v2.1';
+const CACHE_NAME = 'mafaheem-v2.2';
 const urlsToCache = [
   './',
   './index.html',
