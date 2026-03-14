@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Mafaheem">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mafaheem Master - 3 Books Combined</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    <style>
+        html { overflow-x: hidden; }
+        :root { --primary: #1e3a5f; --primary-light: #2c5282; --secondary: #2d8a5e; --secondary-dark: #1e6b48; --wrong: #c53030; --wrong-light: #feb2b2; --bg: #eef2f7; --accent: #d69e2e; --card-bg: #ffffff; --text: #1a202c; --text-muted: #4a5568; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(160deg, #e8eef5 0%, #dae2ec 50%, #eef2f7 100%); display: flex; flex-direction: column; align-items: center; padding: 24px; min-height: 100vh; margin: 0; overflow-x: hidden; box-sizing: border-box; }
+        .selector-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+        .book-select, .mode-select { padding: 8px 12px; border-radius: 12px; border: 2px solid rgba(30,58,95,0.15); font-size: 0.9rem; font-weight: 600; cursor: pointer; min-width: 120px; background: #fff; color: var(--primary); transition: border-color 0.2s, box-shadow 0.2s; }
+        .book-select:focus, .mode-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,58,95,0.1); }
+        .mode-select { min-width: 160px; }
+        .how-to-wrap { position: relative; flex-shrink: 0; }
+        .how-to-btn { width: 28px; height: 28px; border-radius: 50%; border: none; background: linear-gradient(145deg, #e8eef4, #fff); color: var(--primary); font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; box-shadow: 0 2px 8px rgba(44,62,80,0.15); transition: all 0.2s ease; }
+        .how-to-btn:hover { background: linear-gradient(145deg, var(--primary), #34495e); color: white; box-shadow: 0 4px 12px rgba(44,62,80,0.3); transform: scale(1.05); }
+        .how-to-popover { display: none; position: absolute; top: 100%; left: 50%; margin-top: 10px; margin-left: -150px; width: 300px; padding: 16px 18px; background: linear-gradient(to bottom, #ffffff, #fafbfc); border: 1px solid rgba(44,62,80,0.12); border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(44,62,80,0.04); font-size: 0.78rem; line-height: 1.5; text-align: left; direction: ltr; z-index: 100; animation: howToFade 0.2s ease; }
+        .how-to-popover::before { content: ''; position: absolute; top: -6px; left: 50%; margin-left: -6px; width: 12px; height: 12px; background: #fff; border-left: 1px solid rgba(44,62,80,0.12); border-top: 1px solid rgba(44,62,80,0.12); transform: rotate(45deg); }
+        @keyframes howToFade { from { opacity: 0; transform: translateX(-50%) translateY(-6px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .how-to-wrap.open .how-to-popover { display: block; }
+        .how-to-popover strong { display: block; margin: 12px 0 6px; color: var(--primary); font-size: 0.8rem; letter-spacing: 0.3px; }
+        .how-to-popover strong:first-child { margin-top: 0; }
+        .card { margin-top: 24px; max-width: 600px; width: 100%; min-width: 0; background: var(--card-bg); padding: 32px; border-radius: 24px; box-shadow: 0 4px 6px rgba(30,58,95,0.04), 0 12px 32px rgba(30,58,95,0.08); border: 1px solid rgba(30,58,95,0.06); box-sizing: border-box; }
+        .stats-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
+        .stat-item { background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%); padding: 14px; border-radius: 14px; text-align: center; border: 1px solid #e2e8f0; transition: transform 0.2s, box-shadow 0.2s; min-width: 0; }
+        .stat-item:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,58,95,0.06); }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .stat-val { display: block; font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-top: 4px; }
+        @media (max-width: 420px) {
+            body { padding: 12px; }
+            .card { padding: 16px; margin-top: 12px; }
+            .stats-bar { gap: 6px; margin-bottom: 20px; }
+            .stat-item { padding: 8px 6px; }
+            .stat-label { font-size: 0.6rem; }
+            .stat-val { font-size: 0.95rem; }
+        }
+        .arabic-display { font-family: 'Amiri', serif; font-size: 4.8rem; text-align: center; margin: 20px 0; color: var(--text); direction: rtl; min-height: 140px; line-height: 1.3; padding: 20px; background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%); border-radius: 16px; border: 1px solid #e2e8f0; }
+        .arabic-display.multi-word { font-size: 2.4rem; min-height: 100px; line-height: 1.4; padding: 16px; }
+        input { width: 100%; padding: 16px 18px; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 1.15rem; text-align: center; outline: none; box-sizing: border-box; transition: border 0.25s, box-shadow 0.25s; background: #fafbfc; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,58,95,0.12); }
+        input::placeholder { color: #94a3b8; }
+        button { width: 100%; padding: 16px; margin-top: 16px; border-radius: 14px; border: none; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        button:hover { transform: translateY(-2px); }
+        button:active { transform: translateY(0); }
+        .btn-check { background: linear-gradient(145deg, var(--primary) 0%, var(--primary-light) 100%); color: white; box-shadow: 0 4px 14px rgba(30,58,95,0.25); }
+        .btn-check:hover { box-shadow: 0 6px 20px rgba(30,58,95,0.3); }
+        .btn-next { background: linear-gradient(145deg, var(--secondary) 0%, var(--secondary-dark) 100%); color: white; box-shadow: 0 4px 14px rgba(45,138,94,0.25); }
+        .btn-next:hover { box-shadow: 0 6px 20px rgba(45,138,94,0.35); }
+        .btn-override { background: #fffbeb; color: var(--accent); border: 2px solid var(--accent) !important; margin-top: 12px; font-size: 0.9rem; box-shadow: none; }
+        .btn-override:hover { background: #fef3c7; }
+        .feedback { margin-top: 22px; padding: 18px 20px; border-radius: 16px; display: none; text-align: center; animation: fadeIn 0.3s ease; border: 1px solid rgba(0,0,0,0.06); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .page-title { font-size: 1.5rem; font-weight: 700; color: var(--primary); letter-spacing: -0.02em; margin-bottom: 8px; }
+        .admin-panel { max-width: 600px; width: 100%; margin-top: 40px; background: var(--card-bg); padding: 24px; border-radius: 16px; border: 1px dashed #cbd5e1; font-size: 0.85rem; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; }
+        .reset-link { margin-top: 20px; color: var(--wrong); cursor: pointer; font-size: 0.8rem; opacity: 0.5; margin-bottom: 20px; }
+        .footer-line { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+        .footer-line a { color: var(--secondary); text-decoration: none; transition: color 0.2s; }
+        .footer-line a:hover { color: var(--secondary-dark); text-decoration: underline; }
+        .mode-select { padding: 6px 10px; border-radius: 8px; border: 2px solid var(--primary); font-size: 0.85rem; font-weight: 600; cursor: pointer; min-width: 160px; }
+        #study-screen-wrap { display: none; max-height: 380px; overflow-y: auto; margin-bottom: 24px; }
+        #study-screen-wrap.visible { display: block; }
+        .study-caption { font-size: 1.05rem; font-weight: 700; color: var(--primary); margin-bottom: 18px; text-align: center; letter-spacing: 0.3px; }
+        .study-list { display: flex; flex-direction: column; gap: 12px; }
+        .study-item { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center; padding: 14px 18px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 14px; border: 1px solid #e2e8f0; transition: box-shadow 0.2s, transform 0.2s; }
+        .study-item:hover { box-shadow: 0 2px 8px rgba(30,58,95,0.06); }
+        .study-item:nth-child(odd) { background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%); }
+        .study-item .study-ar { font-family: 'Amiri', serif; font-size: 1.5rem; color: var(--text); direction: rtl; text-align: right; }
+        .study-item .study-ar.multi { font-size: 1.1rem; }
+        .study-item .study-en { font-size: 0.95rem; color: var(--text-muted); line-height: 1.45; }
+        @media (max-width: 420px) { .study-item { grid-template-columns: 1fr; } .study-item .study-ar { text-align: center; } }
+        .btn-start-test { margin-top: 24px; background: linear-gradient(145deg, var(--secondary) 0%, var(--secondary-dark) 100%); color: white; font-weight: 700; padding: 16px 28px; box-shadow: 0 4px 14px rgba(45,138,94,0.25); }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="selector-row">
+        <select class="book-select" id="bookSelect">
+            <option value="1">Book 1 (253)</option>
+            <option value="2">Book 2 (213)</option>
+            <option value="3">Book 3 (328)</option>
+            <option value="all">All 3 (777)</option>
+        </select>
+        <select class="book-select" id="modeSelect" style="min-width: 160px;">
+            <option value="do">Learn by doing</option>
+            <option value="learn_then_test">First learn then test</option>
+        </select>
+        <div class="how-to-wrap" id="howToWrap">
+            <button type="button" class="how-to-btn" id="howToBtn" title="How to use">ⓘ</button>
+            <div class="how-to-popover">
+                <strong>How to use</strong>
+                Pick a book from the dropdown. Type the English meaning of the Arabic word and press <b>Check Answer</b> or <b>Enter</b>.
+                <strong>Session</strong>
+                10 words per session. Struggling words first, then non-mastered. 50% chance to include 1 mastered word for review.
+                <strong>Mastery</strong>
+                2 correct answers = word mastered. Stats: Mastery (X/total), Struggling count, Progress (current/10).
+                <strong>"I am right"</strong>
+                If marked wrong but your answer is correct, click to submit for admin approval. Progress saves automatically.
+            </div>
+        </div>
+    </div>
+    <div class="stats-bar">
+        <div class="stat-item"><span class="stat-label">Mastery</span><span class="stat-val" id="perc">0/0</span></div>
+        <div class="stat-item"><span class="stat-label">Struggling</span><span class="stat-val" id="wrongs">0</span></div>
+        <div class="stat-item"><span class="stat-label">Progress</span><span class="stat-val" id="prog">0/10</span></div>
+    </div>
+    <div id="session-complete-wrap" style="display:none; text-align:center; padding:40px 20px;">
+        <p style="font-size:1.3rem; color:var(--secondary); font-weight:bold;">Session complete!</p>
+        <button id="startNewSessionBtn" class="btn-next" style="margin-top:20px;">Start New Session</button>
+    </div>
+    <div id="study-screen-wrap" style="display:none;">
+        <p class="study-caption">📖 Study these <span id="study-count">0</span> new words first</p>
+        <div id="study-list" class="study-list"></div>
+        <button id="startTestBtn" class="btn-next btn-start-test" onclick="startTestFromStudy()">Start Test</button>
+    </div>
+    <div id="word-drill-wrap">
+        <div class="arabic-display" id="q-word">...</div>
+        <input type="text" id="answer-input" placeholder="Enter meaning..." autocomplete="off">
+        <div id="feedback-box" class="feedback">
+            <div id="fb-status" style="font-weight:bold; font-size:1.2rem;"></div>
+            <div id="fb-meaning" style="font-size:1.1rem; margin-top: 5px;"></div>
+            <button id="override-btn" class="btn-override" style="display:none;">I am right (Add to My Dictionary)</button>
+        </div>
+        <button id="action-btn" class="btn-check">Check Answer</button>
+    </div>
+</div>
+<div class="admin-panel" id="admin-panel">
+    <strong>Admin: Review Student Suggestions</strong>
+    <table id="suggestion-table">
+        <thead><tr><th>Arabic</th><th>Suggested</th><th>Action</th></thead>
+        <tbody id="suggestion-body"></tbody>
+    </table>
+</div>
+<div class="reset-link" onclick="resetDB()">Reset Local Progress Data</div>
+<div class="footer-line">Beta 1.1</div>
+<div class="footer-line">For Feedback Whatsapp <a href="https://wa.me/923220578898" target="_blank" rel="noopener">+923220578898</a></div>
+<div class="footer-line"><a href="mailto:excellencecentretuition@gmail.com">excellencecentretuition@gmail.com</a></div>
+
+<script>
+const rawDataBook1 = [
+    { "ar": "آيَة", "en": "Sign" },
+    { "ar": "آيَات", "en": "Signs" },
+    { "ar": "تُرَاب", "en": "Dust" },
+    { "ar": "نَهَار", "en": "Day (light)" },
+    { "ar": "إِخْتِلَاف", "en": "Difference" },
+    { "ar": "أَرْض", "en": "Earth" },
+    { "ar": "اللّٰه", "en": "Allah" },
+    { "ar": "أَلْسِنَة", "en": "Languages" },
+    { "ar": "أَلْوَان", "en": "Colors" },
+    { "ar": "اِسْم", "en": "Name" },
+    { "ar": "خَلْق", "en": "Creation" },
+    { "ar": "رَحْمٰن", "en": "Beneficent" },
+    { "ar": "رَحِيم", "en": "All Merciful" },
+    { "ar": "سَمَاوَات", "en": "Heavens - Skies" },
+    { "ar": "شَمْس", "en": "Sun" },
+    { "ar": "قَمَر", "en": "Moon" },
+    { "ar": "قَوْم", "en": "People" },
+    { "ar": "لَيْل - لَيْلَة", "en": "Night" },
+    { "ar": "مُؤْمِنِينَ — مُؤْمِنُونَ", "en": "Believers" },
+    { "ar": "ذٰلِكَ", "en": "This - That" },
+    { "ar": "كُم", "en": "You all" },
+    { "ar": "هـِ — هُ", "en": "He - His - Him - It" },
+    { "ar": "وَ", "en": "And – Swear" },
+    { "ar": "بِـ", "en": "With - In" },
+    { "ar": "مِنْ", "en": "From" },
+    { "ar": "لَ", "en": "Certainly" },
+    { "ar": "لِ", "en": "For" },
+    { "ar": "فِي", "en": "In" },
+    { "ar": "أَنْ", "en": "That" },
+    { "ar": "إِنَّ", "en": "Certainly" },
+    { "ar": "خَلَقَ", "en": "(He) created" },
+    { "ar": "يَتَفَكَّرُونَ", "en": "They reflect – They ponder" },
+    { "ar": "يَعْقِلُونَ", "en": "They apply reason" },
+    { "ar": "إِلٰه", "en": "God" },
+    { "ar": "بَصِير", "en": "All Seeing" },
+    { "ar": "حَمْد", "en": "Praise" },
+    { "ar": "حَيّ", "en": "Living" },
+    { "ar": "رَؤُوف", "en": "Most kind – Affectionate" },
+    { "ar": "رَبّ", "en": "Lord" },
+    { "ar": "شَيْء", "en": "Thing" },
+    { "ar": "عَالَمِين", "en": "Worlds" },
+    { "ar": "حَكِيم", "en": "All Wise" },
+    { "ar": "خَبِير", "en": "All Aware" },
+    { "ar": "سَمِيع", "en": "All Hearing" },
+    { "ar": "عِبَاد", "en": "Servants" },
+    { "ar": "عَلِيم", "en": "All Knowing" },
+    { "ar": "عَلِيّ", "en": "All Exalted" },
+    { "ar": "غَفُور", "en": "Oft Forgiving – All Forgiving" },
+    { "ar": "قَدِير", "en": "All Powerful" },
+    { "ar": "قَيُّوم", "en": "Self Subsisting – All Sustainer" },
+    { "ar": "عَزِيز", "en": "All Mighty" },
+    { "ar": "عَظِيم", "en": "All Supreme" },
+    { "ar": "كُلّ", "en": "All" },
+    { "ar": "نَاس", "en": "People – Mankind" },
+    { "ar": "هُوَ", "en": "He" },
+    { "ar": "لَا", "en": "No – Not" },
+    { "ar": "مَا", "en": "That which – That – Not – What" },
+    { "ar": "إِلَّا", "en": "Except – But" },
+    { "ar": "بِ", "en": "In relation to – With – With the help of/by means of/Through – In" },
+    { "ar": "اسْتَغْفِر", "en": "You seek forgiveness (Imperative)" },
+    { "ar": "كَانَ", "en": "Was – Is" },
+    { "ar": "آخِرَة", "en": "Hereafter – End" },
+    { "ar": "جَمِيعًا", "en": "All – All of them/that/those/you/it" },
+    { "ar": "دِين", "en": "Retribution – Religion" },
+    { "ar": "صِرَاط", "en": "Path" },
+    { "ar": "قَبْل", "en": "Before" },
+    { "ar": "مَالِك", "en": "Master" },
+    { "ar": "مُسْتَقِيم", "en": "Straight" },
+    { "ar": "مُلْك", "en": "Kingdom" },
+    { "ar": "يَوْم", "en": "Day" },
+    { "ar": "وَاحِد – وَاحِدَة", "en": "One" },
+    { "ar": "حُكْم", "en": "Judgment – Ruler ship" },
+    { "ar": "وَلِيّ", "en": "Guardian" },
+    { "ar": "أُولٰى", "en": "World Beginning – First" },
+    { "ar": "ى", "en": "My – Me – Mine" },
+    { "ar": "هٰذِهِ – هٰذَا", "en": "This (Female) – This (Male)" },
+    { "ar": "الَّذِي", "en": "He who" },
+    { "ar": "الَّذِينَ", "en": "Those who" },
+    { "ar": "إِلَى", "en": "Towards – To" },
+    { "ar": "مَنْ", "en": "Whoever – He who" },
+    { "ar": "يَا أَيُّهَا — أَيُّهَا — يَا", "en": "O" },
+    { "ar": "فَ", "en": "Then – so" },
+    { "ar": "اعْبُدُوا", "en": "You all worship (Imperative)" },
+    { "ar": "يَهْدِي", "en": "(He) guides" },
+    { "ar": "يَشَاءُ", "en": "(He) wishes" },
+    { "ar": "سَلَامٌ", "en": "Peace" },
+    { "ar": "طُلُوع", "en": "(Sun) Rise – To come out" },
+    { "ar": "غُرُوب", "en": "(Sun) Set" },
+    { "ar": "مُرْسَلِين", "en": "Messengers – Apostles" },
+    { "ar": "نَا", "en": "We – Our – Us" },
+    { "ar": "هُدَى", "en": "Guidance" },
+    { "ar": "بِ", "en": "In relation to – With – With the help of/by means of/Through – In" },
+    { "ar": "عَلَى", "en": "Upon – Over – On" },
+    { "ar": "إِيَّاكَ — كَ — كِ", "en": "You – Your" },
+    { "ar": "نَسْتَعِينُ", "en": "We seek help" },
+    { "ar": "نَعْبُدُ", "en": "We worship" },
+    { "ar": "آمَنُوا", "en": "They believed" },
+    { "ar": "اسْتَغْفِرُوا", "en": "You all seek forgiveness (Imperative)" },
+    { "ar": "اِهْدِ", "en": "You guide (Imperative)" },
+    { "ar": "تُوبُوا", "en": "You all repent – You all turn (to)(Imperative)" },
+    { "ar": "سَبِّحْ", "en": "You Glorify – (Imperative)" },
+    { "ar": "سَبِّحْ بِ", "en": "Celebrate (His) (praise) (Imperative)" },
+    { "ar": "أَخُو — أَخِي — أَخَا — أَخْ", "en": "Brother" },
+    { "ar": "أُمَّة", "en": "Nation" },
+    { "ar": "أَمِين", "en": "Trustworthy" },
+    { "ar": "رَسُول", "en": "Messenger" },
+    { "ar": "رُسُل", "en": "Messengers" },
+    { "ar": "شَاهِد", "en": "Witness" },
+    { "ar": "شُعَيْب", "en": "Shu’ayb (AS)" },
+    { "ar": "الطَّاغُوت", "en": "Fake gods/Idols – Shaitaan – One who is rebellious (against Allah)" },
+    { "ar": "كِتَاب", "en": "Book – Quran" },
+    { "ar": "نُوح", "en": "Nuh (AS)" },
+    { "ar": "بَيِّنَات", "en": "Clear evidences" },
+    { "ar": "هُمْ", "en": "They all – Them" },
+    { "ar": "إِذْ", "en": "When" },
+    { "ar": "قَدْ", "en": "Certainly" },
+    { "ar": "مَعَ", "en": "With" },
+    { "ar": "لٰكِنَّ — لٰكِنْ", "en": "But – However" },
+    { "ar": "اتَّقُوا", "en": "You all be wary of" },
+    { "ar": "اجْتَنِبُوا", "en": "You all keep away" },
+    { "ar": "أَرْسَلْنَا", "en": "We sent" },
+    { "ar": "أَطِيعُوا", "en": "You all obey (Imperative)" },
+    { "ar": "أَنْذِرْ", "en": "You Warn (Imperative)" },
+    { "ar": "أَنْزَلْنَا", "en": "We revealed – We sent down" },
+    { "ar": "بَعَثْنَا", "en": "We raised – We sent" },
+    { "ar": "جَاءُوا بِ", "en": "They brought" },
+    { "ar": "قَالَ", "en": "(He) said" },
+    { "ar": "يُسَلِّطُ", "en": "(He) gives authority to" },
+    { "ar": "آدَم", "en": "Adam(AS)" },
+    { "ar": "آل", "en": "Family – Progeny" },
+    { "ar": "إِبْرَاهِيم", "en": "Ibrahim(AS)" },
+    { "ar": "أُسْوَة", "en": "Exemplar" },
+    { "ar": "بَيْت", "en": "House" },
+    { "ar": "حَسَنَة", "en": "Good – Good deed – Virtue" },
+    { "ar": "حِكْمَة", "en": "Wisdom" },
+    { "ar": "عِمْرَان", "en": "I’mran(AS)" },
+    { "ar": "عِيسَى", "en": "I’saa(AS)" },
+    { "ar": "مَرْيَم", "en": "Maryam(SA)" },
+    { "ar": "مُسْلِم", "en": "Muslim – One who submits" },
+    { "ar": "مُسْلِمِينَ – مُسْلِمُونَ", "en": "Muslims – Those who submit" },
+    { "ar": "مُوسَىٰ", "en": "Musa(AS)" },
+    { "ar": "مِيثَاق", "en": "Covenant" },
+    { "ar": "نَبِيّ", "en": "Prophet" },
+    { "ar": "نَبِيِّينَ – نَبِيُّونَ", "en": "Prophets" },
+    { "ar": "أَبِي — أَب — أَبَا — أَبُو", "en": "Father" },
+    { "ar": "اِبْن", "en": "Son" },
+    { "ar": "أَوْلَىٰ", "en": "Nearest – More/most deserving" },
+    { "ar": "حَنِيف", "en": "Hanif (True in Faith)" },
+    { "ar": "سَمَّىٰ", "en": "(He) named" },
+    { "ar": "صِدِّيق", "en": "(Very) Truthful" },
+    { "ar": "مِلَّة", "en": "Faith/Religion" },
+    { "ar": "نَصْرَانِيّ", "en": "Christian" },
+    { "ar": "يَهُودِيّ", "en": "Jew" },
+    { "ar": "آتَيْنَا", "en": "We gave" },
+    { "ar": "اتَّبَعُوا", "en": "They all followed" },
+    { "ar": "أَخَذْنَا", "en": "We took – We seized" },
+    { "ar": "اذْكُرْ", "en": "You remember – You mention – You celebrate/glorify/laud (Imperative)" },
+    { "ar": "اصْطَفَىٰ", "en": "(He) chose" },
+    { "ar": "كَانَتْ", "en": "(She) was/is/ (It - feminine) was/is/" },
+    { "ar": "مَا كَانَ", "en": "(He) was not/is not/" },
+    { "ar": "آخَرِينَ", "en": "Others" },
+    { "ar": "بَنِي", "en": "Children" },
+    { "ar": "دُون", "en": "Besides – Other than" },
+    { "ar": "سُلْطَانٍ", "en": "Authority – Proof" },
+    { "ar": "مُبِين", "en": "Manifest – Clear" },
+    { "ar": "أَجْمَعِينَ", "en": "All of it – All of them" },
+    { "ar": "إِسْرَائِيل", "en": "Israel(AS) / Yaqub(AS)" },
+    { "ar": "أَنْبِيَاء", "en": "Prophets" },
+    { "ar": "ظُلُمَات", "en": "Darkness" },
+    { "ar": "فِرْعَوْنَ", "en": "Fira’on" },
+    { "ar": "مُلُوك", "en": "Kings" },
+    { "ar": "نِعْمَة", "en": "Blessing" },
+    { "ar": "نُور", "en": "Light" },
+    { "ar": "وَزِير", "en": "Minister - Aider" },
+    { "ar": "وَكِيل", "en": "Guardian – Disposer of Affairs" },
+    { "ar": "هَارُون", "en": "Haroon(AS)" },
+    { "ar": "مُخْلَص", "en": "Sincere – Purified - Dedicated" },
+    { "ar": "هُمَا", "en": "Those two – Both of them" },
+    { "ar": "ثُمَّ", "en": "Then" },
+    { "ar": "أَخْرِجْ", "en": "You bring out" },
+    { "ar": "اذْكُرُوا", "en": "You all remember" },
+    { "ar": "أَغْرَقْنَا", "en": "We drowned" },
+    { "ar": "أَنْجَيْنَا", "en": "We delivered" },
+    { "ar": "جَعَلَ", "en": "(He) made – (He) appointed" },
+    { "ar": "جَعَلْنَا", "en": "We made – We appointed" },
+    { "ar": "لَا تَتَّخِذُوا", "en": "You all don’t take" },
+    { "ar": "أَحَد", "en": "One – Alone" },
+    { "ar": "أَحْمَد", "en": "Name of the Prophet (SAWS)" },
+    { "ar": "بَعْدَ", "en": "After" },
+    { "ar": "حَقّ", "en": "Right – Truth" },
+    { "ar": "خَاتَم", "en": "(He) who seal" },
+    { "ar": "رَحْمَة", "en": "Mercy" },
+    { "ar": "مُحَمَّد", "en": "Mohammed (SAWS)" },
+    { "ar": "يس", "en": "Ya Seen" },
+    { "ar": "بَشِير", "en": "Giver of glad tidings" },
+    { "ar": "رِجَال", "en": "Men" },
+    { "ar": "مُبَشِّرًا", "en": "Giver of glad tidings" },
+    { "ar": "نَذِير", "en": "Warner" },
+    { "ar": "وَ", "en": "And – Swear" },
+    { "ar": "إِنَّمَا", "en": "Certainly Only" },
+    { "ar": "أَنَّمَا", "en": "That (which)" },
+    { "ar": "مَا", "en": "That which – That – Not – What" },
+    { "ar": "يَأْتِي", "en": "(He) will come – (It) will come" },
+    { "ar": "يُحْيِي", "en": "(He) gives life" },
+    { "ar": "يُمِيتُ", "en": "(He) gives death" },
+    { "ar": "يُوحَىٰ", "en": "It has been revealed" },
+    { "ar": "آمِنُوا", "en": "You All Believe (Imperative)" },
+    { "ar": "أَرْسَلَ", "en": "(He) sent" },
+    { "ar": "قُلْ", "en": "You say (Imperative)" },
+    { "ar": "شَهْرُ", "en": "Month" },
+    { "ar": "إِذْنِ", "en": "Permission" },
+    { "ar": "رَمَضَانَ", "en": "Ramadh’an" },
+    { "ar": "عَبْد", "en": "Servant" },
+    { "ar": "عَرَبِيّ", "en": "Arabic" },
+    { "ar": "قَدْر", "en": "Ordainment – Determination" },
+    { "ar": "قُرْآن", "en": "Qur’an" },
+    { "ar": "مُبَارَك – مُبَارَكَة", "en": "Blessed" },
+    { "ar": "مُخْلِصاً", "en": "Sincere – Pure" },
+    { "ar": "مُنْذِرِينَ", "en": "Warners" },
+    { "ar": "كَذٰلِكَ", "en": "In this way – Like that" },
+    { "ar": "لَعَلَّ", "en": "May be" },
+    { "ar": "مَا", "en": "That which – That – Not – What" },
+    { "ar": "بَيْن", "en": "Between" },
+    { "ar": "اتَّبِعُوا", "en": "You all follow (Imperative)" },
+    { "ar": "اعْبُدْ", "en": "You worship (Imperative)" },
+    { "ar": "أَنْزَلَ", "en": "(He) sent down – (He) revealed" },
+    { "ar": "أُنْزِلَ", "en": "(It) was sent down – (It) was revealed" },
+    { "ar": "تُخْرِجُ", "en": "You bring out – You take out" },
+    { "ar": "تُرْحَمُونَ", "en": "You all be granted mercy" },
+    { "ar": "تَعْقِلُونَ", "en": "You all apply reason" },
+    { "ar": "كُنَّا", "en": "We were – We are" },
+    { "ar": "مَا أَدْرَاكَ", "en": "What will show you" },
+    { "ar": "يُؤْمِنُونَ", "en": "They all believe" },
+    { "ar": "نَزَّلَ", "en": "(He) sent down – (He) revealed" },
+    { "ar": "رِضْوَانَ", "en": "Pleasure" },
+    { "ar": "مُتَّقِينَ - مُتَّقُونَ", "en": "God wary – Pious" },
+    { "ar": "مَثَل", "en": "Example" },
+    { "ar": "مَوْعِظَة", "en": "Admonition" },
+    { "ar": "يَدَا - يَدَيْ", "en": "Two hands" },
+    { "ar": "مُصَدِّق", "en": "Confirmer" },
+    { "ar": "بُشْرَىٰ", "en": "Glad Tidings" },
+    { "ar": "بَصَائِر", "en": "Eye openers" },
+    { "ar": "بَيَان", "en": "Clear statement" },
+    { "ar": "رَيْب", "en": "Doubt" },
+    { "ar": "سُبُل", "en": "Ways" },
+    { "ar": "تِلْكَ", "en": "Those – That – These" },
+    { "ar": "يُوقِنُونَ", "en": "They all are certain" },
+    { "ar": "يُخْرِجُ", "en": "(He) brings out" },
+    { "ar": "يَتَذَكَّرُونَ", "en": "They all take admonition" },
+    { "ar": "اتَّبَعَ", "en": "(He) followed" },
+    { "ar": "أَوْحَيْنَا", "en": "We revealed – We sent down" },
+    { "ar": "جَاءَ", "en": "(He/it) came" },
+    { "ar": "ضَرَبْنَا", "en": "We hit – We gave" }
+  ];
+const rawDataBook2 = [
+    { "ar": "اَحْسَنَ", "en": "Best" },
+    { "ar": "بُرْهَان", "en": "Proof" },
+    { "ar": "حَدِيث", "en": "Discourse" },
+    { "ar": "ذِكْر", "en": "Reminder – Quran – Remembrance" },
+    { "ar": "شِفَاء", "en": "Cure – Healing" },
+    { "ar": "مِيزَان", "en": "Balance – Scale" },
+    { "ar": "اَقْوَمَ", "en": "Most upright" },
+    { "ar": "الَّتِي", "en": "That which – One who – One whom (female)" },
+    { "ar": "تِبْيَان", "en": "Clarification" },
+    { "ar": "حَافِظُوْنَ – حَافِظِيْنَ", "en": "Protectors – Guardians" },
+    { "ar": "نَحْنُ", "en": "We – Us" },
+    { "ar": "هِىَ", "en": "She – Her – It" },
+    { "ar": "لَمَّا", "en": "When" },
+    { "ar": "اخْتَلَفُوا", "en": "They all differed" },
+    { "ar": "كَفَرُوا", "en": "They all rejected – They all disbelieved" },
+    { "ar": "نَزَّلْنَا", "en": "We sent down – We revealed" },
+    { "ar": "نُنَزِّلُ", "en": "We send down – We reveal" },
+    { "ar": "يَحْكُمُ", "en": "(He) judges" },
+    { "ar": "يَدَّبَّرُوا", "en": "They all ponder" },
+    { "ar": "اِنْجِيل", "en": "Evangel – Bible" },
+    { "ar": "اَهْل", "en": "Family – People of" },
+    { "ar": "تَوْرَاة", "en": "Torah" },
+    { "ar": "وَالِدَة", "en": "Mother" },
+    { "ar": "اُولٰئِكَ", "en": "Those – These" },
+    { "ar": "فَاسِقُوْنَ – فَاسِقِيْنَ", "en": "Transgressors" },
+    { "ar": "فُرْقَان", "en": "Distinguisher – Quran" },
+    { "ar": "وَعْد", "en": "Promise" },
+    { "ar": "اَنَّ", "en": "That" },
+    { "ar": "هَا", "en": "Her – It (Female)" },
+    { "ar": "لَوْ", "en": "If" },
+    { "ar": "اَقَامُوا¹", "en": "They all up hold – They all established" },
+    { "ar": "عَلَّمْتُ", "en": "I taught" },
+    { "ar": "قَالُوا", "en": "They Said" },
+    { "ar": "قِيلَ", "en": "(It) was said" },
+    { "ar": "لَمْ يَحْكُمْ", "en": "(He) did not Judge" },
+    { "ar": "نُؤْمِنُ", "en": "We believe" },
+    { "ar": "وَلْيَحْكُمْ", "en": "And (He) must Judge" },
+    { "ar": "يُعَلِّمُ", "en": "(He) Teaches" },
+    { "ar": "رِزْق", "en": "Sustenance" },
+    { "ar": "شَفَاعَة", "en": "Intercession" },
+    { "ar": "عَرْش", "en": "Throne" },
+    { "ar": "غَيْر", "en": "Other than" },
+    { "ar": "كَرِيم", "en": "Honorable – Noble" },
+    { "ar": "مَلِك", "en": "Sovereign" },
+    { "ar": "تَعَالٰى", "en": "Exalted" },
+    { "ar": "مَصِير", "en": "Return - End" },
+    { "ar": "نَصِير", "en": "Helper" },
+    { "ar": "وَاسِع – وَاسِعَة", "en": "¹Extensive" },
+    { "ar": "وَاصِب", "en": "Enduring" },
+    { "ar": "اَكْثَر", "en": "Many – More – Most" },
+    { "ar": "أَ", "en": "(Question)²" },
+    { "ar": "أَلَا", "en": "Be informed!" },
+    { "ar": "يَمْلِكُ", "en": "(He) owns" },
+    { "ar": "يَخْلُقُ", "en": "(He) creates" },
+    { "ar": "يَعْبُدُونَ", "en": "They all worship" },
+    { "ar": "يَعْلَمُونَ", "en": "They all know" },
+    { "ar": "أَعُوذُ", "en": "I seek protection – I seek refuge" },
+    { "ar": "تَتَّقُونَ", "en": "You all are (God) wary" },
+    { "ar": "تُرْجَعُونَ", "en": "You all will be returned" },
+    { "ar": "يُؤْتِي", "en": "(He) gives" },
+    { "ar": "اَمْن", "en": "Safety" },
+    { "ar": "اِيْمَان", "en": "Belief" },
+    { "ar": "ظُلْم", "en": "Injustice" },
+    { "ar": "قَلْب", "en": "Heart" },
+    { "ar": "كَثِير – كَثِيرَة", "en": "Many" },
+    { "ar": "مُرْشِد", "en": "Guide" },
+    { "ar": "مَشْرِق", "en": "East" },
+    { "ar": "مُشْرِكِيْن – مُشْرِكُوْن", "en": "Polytheists" },
+    { "ar": "مَغْرِب", "en": "West" },
+    { "ar": "صَالِحَات", "en": "Righteous deeds" },
+    { "ar": "قِيَمًا", "en": "Upright" },
+    { "ar": "مُحْسِنِيْن – مُحْسِنُوْن", "en": "Virtuous ones" },
+    { "ar": "مُهْتَدٍ (مُهْتَدِي)", "en": "Rightly guided one" },
+    { "ar": "مُهْتَدُون – مُهْتَدِين", "en": "Rightly guided ones" },
+    { "ar": "اَعْطٰى¹", "en": "(He) Bestowed" },
+    { "ar": "تَجِدُ – (لَنْ) تَجِدَ", "en": "You will find – You will (never) find" },
+    { "ar": "جَاهَدُوا", "en": "They all strived" },
+    { "ar": "عَمِلُوا", "en": "They all did" },
+    { "ar": "لَمْ يَلْبِسُوا", "en": "They all did not taint" },
+    { "ar": "نَهْدِي", "en": "We guide" },
+    { "ar": "هَدٰى", "en": "(He) guided" },
+    { "ar": "يُضِلُّ – يُضْلِلْ", "en": "(He) leads astray" },
+    { "ar": "يُؤْمِنُ", "en": "(He) Believes" },
+    { "ar": "أَصْحَاب", "en": "Companions" },
+    { "ar": "زَكَاة", "en": "Zakat – Charity" },
+    { "ar": "شَيَاطِيْنَ", "en": "Satans – Devils – Evil ones" },
+    { "ar": "صَالِحِينَ", "en": "Righteous ones" },
+    { "ar": "صَلَاة", "en": "Prayer – Salat" },
+    { "ar": "مَوْلَىٰ", "en": "Protector" },
+    { "ar": "نَصَارَىٰ", "en": "Christians" },
+    { "ar": "يَهُود", "en": "Jews" },
+    { "ar": "اَمْ", "en": "However – Or – Have they?" },
+    { "ar": "أَوْلِيَاء", "en": "Guardians – Friends" },
+    { "ar": "خَالِدُونَ – خَالِدِينَ", "en": "Those who remain forever" },
+    { "ar": "رَاكِعُونَ", "en": "Those who bow down" },
+    { "ar": "عَدُوّ", "en": "Enemy" },
+    { "ar": "كَافِرِينَ – كَافِرُونَ", "en": "Disbelievers – Rejecters of faith" },
+    { "ar": "مَوْتَىٰ", "en": "Dead ones (Plural)" },
+    { "ar": "نَار", "en": "Fire – Hellfire" },
+    { "ar": "اِتَّخَذُوا", "en": "They all took" },
+    { "ar": "يَتَوَلَّىٰ", "en": "(He) takes up guardianship of – (He) takes care of" },
+    { "ar": "يُخْرِجُونَ", "en": "They all bring out" },
+    { "ar": "يُقِيمُونَ", "en": "They all establish" },
+    { "ar": "يُؤْتُونَ", "en": "They all give" },
+    { "ar": "اُمَّهَات", "en": "Mothers" },
+    { "ar": "اِنْ", "en": "If" },
+    { "ar": "اَنْفُس (plural of نَفْس)", "en": "Selves¹" },
+    { "ar": "اُولِيْ – اُولُوْ", "en": "Those vested with – Those who possess" },
+    { "ar": "بَلَاغ", "en": "To deliver – To communicate" },
+    { "ar": "لَدُنْ", "en": "From – Near – Side²" },
+    { "ar": "اَزْوَاج (Plural of زَوْج)", "en": "Wives" },
+    { "ar": "اَعْمَال", "en": "Deeds – Works" },
+    { "ar": "اَمْر", "en": "Authority – Command – Affair – Act" },
+    { "ar": "آتُوا", "en": "You all give" },
+    { "ar": "اِجْعَلْ", "en": "You appoint" },
+    { "ar": "اَقِيْمُوا", "en": "You all establish" },
+    { "ar": "تَوَلَّوْا", "en": "They all turned away³ – You turn away (command)" },
+    { "ar": "تَوَلَّيْتُمْ", "en": "You all turned away" },
+    { "ar": "جِئْتُ (كُمْ) بِ", "en": "I brought(to you all)" },
+    { "ar": "لَا تُبْطِلُوا", "en": "You all do not render void" },
+    { "ar": "يُحِبُّ", "en": "(He) likes – loves" },
+    { "ar": "يُطَاعُ", "en": "(He) to be obeyed" },
+    { "ar": "زَلْزَلَة", "en": "Earthquake" },
+    { "ar": "قِيَامَة", "en": "(Day of) Resurrection" },
+    { "ar": "نَفْس", "en": "Self – Individual – Soul" },
+    { "ar": "السَّاعَة (ساعة)", "en": "Resurrection (Time)" },
+    { "ar": "بَعْث", "en": "Resurrection" },
+    { "ar": "اِذَا", "en": "When" },
+    { "ar": "كَـ", "en": "Like" },
+    { "ar": "خَلَقْنَا", "en": "We created" },
+    { "ar": "خَسِرُوا", "en": "(They) ruined" },
+    { "ar": "كَتَبَ", "en": "(He) wrote – (He) made incumbent" },
+    { "ar": "يَجْمَعُ", "en": "(He) will gather" },
+    { "ar": "اتَّقُوا", "en": "You all be wary of" },
+    { "ar": "كُنْتُمْ", "en": "You(all) were – You (all) are" },
+    { "ar": "بَعْض", "en": "Some" },
+    { "ar": "حِسَاب", "en": "Reckoning" },
+    { "ar": "خَيْر", "en": "Better – Best – Goodness – Wealth" },
+    { "ar": "صِدْق", "en": "Truthfulness" },
+    { "ar": "ظَالِمِيْنَ (Plural of ظَالِم)", "en": "Oppressors – Wrong doers" },
+    { "ar": "لَعْنَة", "en": "Curse" },
+    { "ar": "مَال", "en": "Wealth" },
+    { "ar": "مَعْذِرَة", "en": "Excuse" },
+    { "ar": "سَرِيع", "en": "Swift" },
+    { "ar": "سُوْء", "en": "Ill – Bad – Badness" },
+    { "ar": "صَادِقِيْنَ (Plural of صَادِق)", "en": "Truthful people" },
+    { "ar": "أَهْلِي¹ (Plural of اهل)", "en": "Families" },
+    { "ar": "سَلِيم", "en": "Sound – In good condition" },
+    { "ar": "دَار", "en": "House – Abode" },
+    { "ar": "بَنُوْنَ (Plural of اِبْن)", "en": "Children – Sons" },
+    { "ar": "خَاسِرِيْنَ – خَاسِرُوْنَ", "en": "Losers" },
+    { "ar": "نِعْمَ", "en": "How nice – How good" },
+    { "ar": "عَسِير", "en": "Hard" },
+    { "ar": "يَوْمَئِذٍ", "en": "That day – Such a day" },
+    { "ar": "خُسْرَان", "en": "Loss" },
+    { "ar": "أَتٰى", "en": "(He) came" },
+    { "ar": "اتَّقَوْا", "en": "They became God wary" },
+    { "ar": "يَنْفَعُ", "en": "(He/it) shall benefit" },
+    { "ar": "تُجْزٰى", "en": "(She/it) shall be requited" },
+    { "ar": "كَسَبَتْ", "en": "(She/it) earned" },
+    { "ar": "كُنْتُمْ تَخْتَلِفُونَ", "en": "You all used to differ – You all used to have differences" },
+    { "ar": "أَكْبَر", "en": "Greater – Greatest" },
+    { "ar": "أَنْهَار (Plural of نَهَر)", "en": "Streams" },
+    { "ar": "تَحْت", "en": "Under – Below – Beneath – Underneath" },
+    { "ar": "مُؤْمِنَات", "en": "Believing women" },
+    { "ar": "سَمَاء", "en": "Heaven – Sky" },
+    { "ar": "جَنَّة", "en": "Garden – Heaven" },
+    { "ar": "جَنَّات (Plural of جَنَّة)", "en": "Gardens – Heavens" },
+    { "ar": "حَرِير", "en": "Silk" },
+    { "ar": "حَيَاة", "en": "Life" },
+    { "ar": "خَالِصَة – خَالِص", "en": "Pure – Immaculate (Feminine and masculine)¹" },
+    { "ar": "دُنْيَا", "en": "World – Worldly life" },
+    { "ar": "زَيْنَة", "en": "Adornment" },
+    { "ar": "عَرْض", "en": "Vastness – Breadth" },
+    { "ar": "لِبَاس", "en": "Dress – Clothing" },
+    { "ar": "مَسَاكِن (Plural of مَسْكَن)", "en": "Dwellings – Houses" },
+    { "ar": "مُطَهَّرَة", "en": "Chaste – Pure" },
+    { "ar": "طَيِّبَة – طَيِّب", "en": "Good – Pure (Feminine and masculine)" },
+    { "ar": "طَيِّبَات", "en": "Good things – Pure things" },
+    { "ar": "عَدْن", "en": "Eternal – Everlasting" },
+    { "ar": "فَوْز", "en": "Success" },
+    { "ar": "مَغْفِرَة", "en": "Forgiveness" },
+    { "ar": "مَنْ", "en": "Whoever – He who" },
+    { "ar": "أَخْرَجَ", "en": "(He) brought forth – (He) brought out" },
+    { "ar": "أُعِدَّتْ", "en": "(She/It) is prepared²" },
+    { "ar": "بَشِّرْ", "en": "You give glad tidings (Imperative)" },
+    { "ar": "تَجْرِي", "en": "(She/It) is flowing – Running³" },
+    { "ar": "حَرَّمَ", "en": "(He) forbade – (He) made prohibited" },
+    { "ar": "سَابِقُوا", "en": "You all take lead (Imperative)" },
+    { "ar": "سَارِعُوا", "en": "You all hasten – You all hurry (Imperative)" },
+    { "ar": "وَعَدَ", "en": "(He) Promised" },
+    { "ar": "يَدْخُلُ", "en": "(He) will admit" },
+    { "ar": "أَعْدَاء", "en": "Enemies (Plural of عَدُوّ)" },
+    { "ar": "بَاطِل", "en": "Falsehood" },
+    { "ar": "جَزَاء", "en": "Requital – Reward or Punishment" },
+    { "ar": "عَذَاب", "en": "Punishment – Torment" },
+    { "ar": "أَلِيم", "en": "Painful" },
+    { "ar": "بِئْسَ", "en": "How bad" },
+    { "ar": "خِزْي", "en": "Disgrace" },
+    { "ar": "خُلْد", "en": "Everlasting – Eternal – Eternity - Forever" },
+    { "ar": "لِقَاء", "en": "Encounter – Meeting" },
+    { "ar": "مُحْضَرُونَ", "en": "Those who are brought" },
+    { "ar": "نَاصِرِينَ", "en": "Helpers (Plural of نَاصِر)" },
+    { "ar": "بِغَيْرِ حَقٍّ", "en": "Unjustly" },
+    { "ar": "أَمَّا", "en": "But" },
+    { "ar": "عَنْ", "en": "From" },
+    { "ar": "أَخَذَ", "en": "(It/He) seized – (It/He) took" },
+    { "ar": "اسْتَكْبَرُوا", "en": "They all be disdainful (of) – They all be proud (against)" },
+    { "ar": "حَبِطَتْ", "en": "(It/She) be ruined – (It/She) failed" },
+    { "ar": "كَذَّبُوا", "en": "They all rejected – They all denied" },
+    { "ar": "يَئِسُوا", "en": "They all despaired – They all lost hope" },
+    { "ar": "يَقْتُلُونَ", "en": "They all kill" },
+    { "ar": "يَكْفُرُونَ", "en": "They all reject – They all disbelieve" }
+  ];
+const rawDataBook3 = [
+  { "ar": "آخِر", "en": "Last – Resurrection" },
+  { "ar": "أَبَدًا", "en": "Forever" },
+  { "ar": "أَجْر", "en": "Reward" },
+  { "ar": "ثَابِت", "en": "Immutable – Permanent – Firm" },
+  { "ar": "خَوْف", "en": "Fear" },
+  { "ar": "صَالِح", "en": "Righteous – Righteous deed" },
+  { "ar": "قَوْل", "en": "Word" },
+  { "ar": "كَبِير", "en": "Great – Big" },
+  { "ar": "كَبِيرة", "en": "Great – Big" },
+  { "ar": "مُصِيبة", "en": "Affliction" },
+  { "ar": "صَابِئِينَ", "en": "Sabaeans" },
+  { "ar": "عِنْدَ", "en": "Near – With" },
+  { "ar": "فَضْل", "en": "Grace" },
+  { "ar": "أَمْوَال", "en": "Possessions – Wealth" },
+  { "ar": "خَيْرَات", "en": "Blessings – Goodness" },
+  { "ar": "دَرَجَات", "en": "Ranks – Degrees" },
+  { "ar": "غَالِب", "en": "Overpowering – Victorious" },
+  { "ar": "قُلُوب", "en": "Hearts" },
+  { "ar": "مُؤْمِن", "en": "Believing man" },
+  { "ar": "مُؤْمِنَة", "en": "Believing woman" },
+  { "ar": "خِيَرَة", "en": "Option – Choice – Right" },
+  { "ar": "سَبِيل", "en": "Way" },
+  { "ar": "مُفْلِحُونَ", "en": "Those who are Successful" },
+  { "ar": "صِيَام", "en": "Fasting" },
+  { "ar": "إِحْسَان", "en": "Kindness – Doing good" },
+  { "ar": "عَدْل", "en": "Justice" },
+  { "ar": "غَيْب", "en": "Unseen" },
+  { "ar": "قِصَاص", "en": "Retribution" },
+  { "ar": "مَعْرُوف", "en": "Good deed – Recognized" },
+  { "ar": "إِثْم", "en": "Sin" },
+  { "ar": "أَلْبَاب", "en": "Intellects – Wisdoms" },
+  { "ar": "سَدِيد", "en": "Upright – Firm – Strong" },
+  { "ar": "ظَنّ", "en": "Guess – Conjecture" },
+  { "ar": "قِسْط", "en": "Justice" },
+  { "ar": "مُنْكَر", "en": "Bad/evil deed" },
+  { "ar": "آبَاء", "en": "Fathers" },
+  { "ar": "إِنْسَان", "en": "Human – Mankind" },
+  { "ar": "جَوَاب", "en": "Answer" },
+  { "ar": "حَلَال", "en": "Permissible" },
+  { "ar": "دُعَاء", "en": "Prayer – To call" },
+  { "ar": "شَرّ", "en": "Worst – Worse – Bad" },
+  { "ar": "فَتْح", "en": "Victory" },
+  { "ar": "كُفَّار", "en": "Disbelievers" },
+  { "ar": "نَصْر", "en": "Help" },
+  { "ar": "نَصِيب", "en": "Profit – Share" },
+  { "ar": "دَوَابّ", "en": "Beasts – Animals" },
+  { "ar": "سَعِير", "en": "Blaze – Ablaze fire" },
+  { "ar": "ضَلَال", "en": "State of being misled" },
+  { "ar": "أَحْزَاب", "en": "Factions – Groups" },
+  { "ar": "إِنْس", "en": "Humans" },
+  { "ar": "بَشَر", "en": "Human being" },
+  { "ar": "جِنّ", "en": "Jinn" },
+  { "ar": "جَهَنَّم", "en": "Hell" },
+  { "ar": "ذُرِّيَّة", "en": "Descendants – Offspring" },
+  { "ar": "شَرِيك", "en": "Partner" },
+  { "ar": "شُرَكَاء", "en": "Partners" },
+  { "ar": "عِبَادَة", "en": "Worship" },
+  { "ar": "أَنْصَار", "en": "Helper" },
+  { "ar": "مَأْوَىٰ", "en": "Place – Dwelling – Abode" },
+  { "ar": "وَلَد", "en": "Son" },
+  { "ar": "خَزَائِن", "en": "Treasures" },
+  { "ar": "سَمَاء", "en": "Heaven – Sky" },
+  { "ar": "شَهَادَة", "en": "Manifest – Witness" },
+  { "ar": "سُفَهَاء", "en": "Fools" },
+  { "ar": "غُرُور", "en": "Delusion" },
+  { "ar": "مُقِيم", "en": "Lasting" },
+  { "ar": "عَاقِبَة", "en": "End – Outcome" },
+  { "ar": "عِزَّة", "en": "Honor" },
+  { "ar": "مَاء", "en": "Water" },
+  { "ar": "مَرَض", "en": "Sickness" },
+  { "ar": "نَبَات", "en": "That which grows" },
+  { "ar": "بُيُوت", "en": "Houses" },
+  { "ar": "حَرَام", "en": "Sacred – Prohibited" },
+  { "ar": "رَجُل", "en": "Man" },
+  { "ar": "شَدِيد", "en": "Severe" },
+  { "ar": "فَاسِق", "en": "Transgressor" },
+  { "ar": "قِيَام", "en": "Means of stabilization" },
+  { "ar": "كَعْبَة", "en": "Ka'aba" },
+  { "ar": "مَلَائِكَة", "en": "Angels" },
+  { "ar": "نِسَاء", "en": "Women" },
+  { "ar": "أَنْعَام", "en": "Cattles – Quadrupeds" },
+  { "ar": "حُدُود", "en": "Bounds – Boundaries" },
+  { "ar": "ذُنُوب", "en": "Sins" },
+  { "ar": "شَفِيع", "en": "Intercessor" },
+  { "ar": "قُوَّة", "en": "Strength – Power" },
+  { "ar": "مَسْجِد", "en": "Masjid" },
+  { "ar": "مَكَان", "en": "Place" },
+  { "ar": "مَقَام", "en": "Status – Standing" },
+  { "ar": "وُجُوه", "en": "Faces" },
+  { "ar": "أَصْل", "en": "Root" },
+  { "ar": "أَصْوَات", "en": "Voices" },
+  { "ar": "تَقْوَىٰ", "en": "God wariness – Piety" },
+  { "ar": "ثَوَاب", "en": "Reward" },
+  { "ar": "مَثُوبَة", "en": "Reward" },
+  { "ar": "شَجَرَة", "en": "Tree" },
+  { "ar": "عِلْم", "en": "Knowledge" },
+  { "ar": "عَنْكَبُوت", "en": "Spider" },
+  { "ar": "فَرْع", "en": "Branch" },
+  { "ar": "بَرَكَات", "en": "Blessings" },
+  { "ar": "حُسْن", "en": "Good – Goodness – Beauty" },
+  { "ar": "عَهْد", "en": "Treaty – Covenant" },
+  { "ar": "فِتْنَة", "en": "Test – Trial" },
+  { "ar": "سَيِّئَات", "en": "Misdeeds – Sins" },
+  { "ar": "مَخْرَج", "en": "Way out" },
+  { "ar": "يُسْر", "en": "Ease" },
+  { "ar": "فَسَاد", "en": "Corruption – Mischief" },
+  { "ar": "مَتَاع", "en": "Enjoyment – Provisions" },
+  { "ar": "قَوْم", "en": "People" },
+  { "ar": "عَالَمِين", "en": "Worlds" },
+  { "ar": "غَفُور", "en": "Oft Forgiving – All Forgiving" },
+  { "ar": "رَحِيم", "en": "All Merciful" },
+  { "ar": "قَدِير", "en": "All Powerful" },
+  { "ar": "حَكِيم", "en": "All Wise" },
+  { "ar": "لَطِيف", "en": "Subtle – Kind" },
+  { "ar": "آمَنَ", "en": "(He) Believed" },
+  { "ar": "أَحْسَنَ", "en": "(He) made excellent" },
+  { "ar": "أَصَابَ", "en": "(He/it) reached" },
+  { "ar": "عَمِلَ", "en": "(He) acted – performed" },
+  { "ar": "نَدْخُلُ", "en": "We admit" },
+  { "ar": "نَنْصُرُ", "en": "We help" },
+  { "ar": "هَادُوا", "en": "They became Jews" },
+  { "ar": "يُثَبِّتُ", "en": "(He) fortifies – makes firm" },
+  { "ar": "يَجْزِي", "en": "(He) rewards" },
+  { "ar": "يَحْزَنُونَ", "en": "They grieve" },
+  { "ar": "يَعْمَلُ", "en": "(He) does" },
+  { "ar": "يَعْمَلُونَ", "en": "They do" },
+  { "ar": "تَطْمَئِنُّ", "en": "(She/it) finds rest" },
+  { "ar": "رَزَقْنَا", "en": "We provided" },
+  { "ar": "قَضَىٰ", "en": "(He) decided" },
+  { "ar": "يَخْذُلُ", "en": "(He) forsakes" },
+  { "ar": "يُقَاتِلُونَ", "en": "They fight" },
+  { "ar": "يَنْصُرُ", "en": "(He) helps" },
+  { "ar": "يُنْفِقُونَ", "en": "They spend in charity" },
+  { "ar": "أَحْسَنُوا", "en": "They did good deeds" },
+  { "ar": "تَعْبُدُونَ", "en": "You all worship" },
+  { "ar": "تَفْعَلُونَ", "en": "You all do" },
+  { "ar": "تَقُولُونَ", "en": "You all say" },
+  { "ar": "دَعَا", "en": "(He) called" },
+  { "ar": "ضَلَّ", "en": "(He) went astray" },
+  { "ar": "ضَلُّوا", "en": "They are misled" },
+  { "ar": "يَضُرُّ", "en": "(He) hurts" },
+  { "ar": "يَأْمُرُ", "en": "(He) commands" },
+  { "ar": "يَأْمُرُونَ", "en": "They command" },
+  { "ar": "يَقُومُ", "en": "(He) rises" },
+  { "ar": "يَنْهَوْنَ", "en": "They forbid" },
+  { "ar": "رَزَقَ", "en": "(He) provided" },
+  { "ar": "يَرْزُقُ", "en": "(He) provides" },
+  { "ar": "كَسَبُوا", "en": "They earned" },
+  { "ar": "تَشْهَدُونَ", "en": "You all testify" },
+  { "ar": "تَكْفُرُونَ", "en": "You all disbelieve" },
+  { "ar": "تُؤْمِنُونَ", "en": "You all believe" },
+  { "ar": "صَدُّوا", "en": "They prevented" },
+  { "ar": "يَغْفِرُ", "en": "(He) forgives" },
+  { "ar": "يَفْعَلُ", "en": "(He) does" },
+  { "ar": "اتَّخَذَ", "en": "(He) took" },
+  { "ar": "يَتُوبُ", "en": "(He) repents" },
+  { "ar": "يُشْرِكُ", "en": "(He) ascribes partner" },
+  { "ar": "يُشْرِكُونَ", "en": "They ascribe partners" },
+  { "ar": "يُعَذِّبُ", "en": "(He) punishes" },
+  { "ar": "يُكَذِّبُ", "en": "(He) denies" },
+  { "ar": "يُكَذِّبُونَ", "en": "They deny" },
+  { "ar": "يَشْعُرُونَ", "en": "They realize" },
+  { "ar": "يَشْهَدُ", "en": "(He) bears witness" },
+  { "ar": "نَشْهَدُ", "en": "We bear witness" },
+  { "ar": "يَفْقَهُونَ", "en": "They understand" },
+  { "ar": "يَقُولُ", "en": "(He) says" },
+  { "ar": "لَعَنَ", "en": "(He) cursed" },
+  { "ar": "هَدَيْنَا", "en": "We guided" },
+  { "ar": "يَعْلَمُ", "en": "(He) knows" },
+  { "ar": "تَعْلَمُ", "en": "You know" },
+  { "ar": "أَنْسَىٰ", "en": "(He) made them forget" },
+  { "ar": "تَعْمَلُونَ", "en": "You all do" },
+  { "ar": "عَصَوْا", "en": "They disobeyed" },
+  { "ar": "يَعْصِ", "en": "(He) disobeys" },
+  { "ar": "نَسُوا", "en": "They forgot" },
+  { "ar": "يَسْتَوُونَ", "en": "They are equal" },
+  { "ar": "يُحْشَرُونَ", "en": "They will be gathered" },
+  { "ar": "يَخْلُقُونَ", "en": "They create" },
+  { "ar": "وَصَّىٰ", "en": "(He) enjoined" },
+  { "ar": "وَصَّيْنَا", "en": "We enjoined" },
+  { "ar": "يُبَيِّنُ", "en": "(He) clarifies" },
+  { "ar": "يَتَّقُونَ", "en": "They become God wary" },
+  { "ar": "يَخَافُونَ", "en": "They fear" },
+  { "ar": "يَدْعُونَ", "en": "They call" },
+  { "ar": "يَظْلِمُونَ", "en": "They do injustice" },
+  { "ar": "يَكْسِبُونَ", "en": "They earn" },
+  { "ar": "ضَرَبَ", "en": "(He) hit" },
+  { "ar": "أَمَرَ", "en": "(He) commanded" },
+  { "ar": "يُعَظِّمُ", "en": "(He) venerates" },
+  { "ar": "آتَىٰ", "en": "(He) gave" },
+  { "ar": "يَجْعَلُ", "en": "(He) appoints" },
+  { "ar": "نَجْعَلُ", "en": "We shall appoint" },
+  { "ar": "يَتَّقِ", "en": "(He) is God wary" },
+  { "ar": "يُكَفِّرُ", "en": "(He) conceals/absolves" },
+  { "ar": "يَتَوَكَّلْ", "en": "(He) puts his trust" },
+  { "ar": "يُرِيدُونَ", "en": "They desire" },
+  { "ar": "أَنْزَلَ", "en": "(He) sent down – (He) revealed" },
+  { "ar": "خَلَقَ", "en": "(He) created" },
+  { "ar": "بَعَثَ", "en": "(He) raised/sent" },
+  { "ar": "جَاءَ", "en": "(He/it) came" },
+  { "ar": "رَأَى", "en": "(He) saw" },
+  { "ar": "ذَهَبَ", "en": "(He) went" },
+  { "ar": "رَجَعَ", "en": "(He) returned" },
+  { "ar": "نَزَلَ", "en": "(He) descended" },
+  { "ar": "خَرَجَ", "en": "(He) went out" },
+  { "ar": "دَخَلَ", "en": "(He) entered" },
+  { "ar": "غَفَرَ", "en": "(He) forgave" },
+  { "ar": "نَصَرَ", "en": "(He) helped" },
+  { "ar": "قَتَلَ", "en": "(He) killed" },
+  { "ar": "كَتَبَ", "en": "(He) wrote – (He) made incumbent" },
+  { "ar": "فَعَلَ", "en": "(He) did" },
+  { "ar": "ذَكَرَ", "en": "(He) remembered/mentioned" },
+  { "ar": "خَافَ", "en": "(He) feared" },
+  { "ar": "مَاتَ", "en": "(He) died" },
+  { "ar": "قَامَ", "en": "(He) stood up" },
+  { "ar": "تَرَكَ", "en": "(He) left" },
+  { "ar": "سَأَلَ", "en": "(He) asked" },
+  { "ar": "نَادَى", "en": "(He) called out" },
+  { "ar": "نَجَّى", "en": "(He) saved" },
+  { "ar": "هَدَى", "en": "(He) guided" },
+  { "ar": "تَوَلَّى", "en": "(He) turned away" },
+  { "ar": "لَقِيَ", "en": "(He) met" },
+  { "ar": "أَتَى", "en": "(He) came" },
+  { "ar": "أَرَادَ", "en": "(He) intended/wanted" },
+  { "ar": "أَعْطَى", "en": "(He) gave" },
+  { "ar": "بَيَّنَ", "en": "(He) made clear" },
+  { "ar": "سَبَّحَ", "en": "(He) glorified" },
+  { "ar": "صَدَّقَ", "en": "(He) believed/confirmed" },
+  { "ar": "كَذَّبَ", "en": "(He) lied/denied" },
+  { "ar": "نَبَّأَ", "en": "(He) informed" },
+  { "ar": "عَلَّمَ", "en": "(He) taught" },
+  { "ar": "قَدَّمَ", "en": "(He) sent forward" },
+  { "ar": "وَقَعَ", "en": "(He) fell/occurred" },
+  { "ar": "وَجَدَ", "en": "(He) found" },
+  { "ar": "وَرِثَ", "en": "(He) inherited" },
+  { "ar": "وَعَدَ", "en": "(He) Promised" },
+  { "ar": "اسْتَجِيبُوا", "en": "Answer (the call)" },
+  { "ar": "اشْكُرُوا", "en": "Thank" },
+  { "ar": "كُلُوا", "en": "Eat" },
+  { "ar": "قُولُوا", "en": "Speak – Say" },
+  { "ar": "كُونُوا", "en": "Be" },
+  { "ar": "لَا تَأْكُلُوا", "en": "Do not eat" },
+  { "ar": "اقْتُلُوا", "en": "Kill" },
+  { "ar": "لَا تُفْسِدُوا", "en": "Do not cause corruption" },
+  { "ar": "تَوَكَّلْ", "en": "Put your trust" },
+  { "ar": "لَا تَكُونُوا", "en": "Do not be" },
+  { "ar": "خُذُوا", "en": "Take" },
+  { "ar": "لَا تَتَّبِعُوا", "en": "Do not follow" },
+  { "ar": "لَا تَقْرَبُوا", "en": "Don't approach" },
+  { "ar": "اعْدِلُوا", "en": "Be just" },
+  { "ar": "تَزَوَّدُوا", "en": "Take provisions" },
+  { "ar": "اعْلَمُوا", "en": "Know" },
+  { "ar": "اصْبِرْ", "en": "Be patient" },
+  { "ar": "دَاوُود", "en": "Prophet Daawud(as)" },
+  { "ar": "سُلَيْمَان", "en": "Prophet Sulaymaan(as)" },
+  { "ar": "ثَمُود", "en": "People of Thamud" },
+  { "ar": "عَاد", "en": "People of Aad" },
+  { "ar": "هُود", "en": "Prophet Hud(as)" },
+  { "ar": "لُوط", "en": "Prophet Lut(as)" },
+  { "ar": "إِسْحَاق", "en": "Prophet Is’haaq(as)" },
+  { "ar": "إِسْمَاعِيل", "en": "Prophet Ismaail(as)" },
+  { "ar": "يَعْقُوب", "en": "Prophet Ya’qoob(as)" },
+  { "ar": "يُوسُف", "en": "Prophet Yusuf(as)" },
+  { "ar": "مَنْ ذَا", "en": "Who?" },
+  { "ar": "إِيَّاهُ", "en": "Only Him" },
+  { "ar": "إِيَّايَ", "en": "Only Me" },
+  { "ar": "كَمَا", "en": "As it is/was" },
+  { "ar": "لِمَ", "en": "Why?" },
+  { "ar": "أَنْتُمْ", "en": "You (plural)" },
+  { "ar": "أَنْتَ", "en": "You (singular)" },
+  { "ar": "لَنْ", "en": "Never" },
+  { "ar": "أَنَا", "en": "I" },
+  { "ar": "بَلْ", "en": "Rather – But" },
+  { "ar": "هَلْ", "en": "Question particle" },
+  { "ar": "مِثْل", "en": "Like" },
+  { "ar": "بَلَىٰ", "en": "Yes" },
+  { "ar": "حَتَّىٰ", "en": "Until" },
+  { "ar": "إِيَّاكُمْ", "en": "You (plural)" },
+  { "ar": "ذَلِكُمْ", "en": "That" },
+  { "ar": "لَيْسَ", "en": "Not" },
+  { "ar": "كَيْفَ", "en": "How" },
+  { "ar": "حَسْب", "en": "Suffice" },
+  { "ar": "حَيْثُ", "en": "Whence" },
+  { "ar": "مَاذَا", "en": "What is it?" },
+  { "ar": "مَلَك", "en": "Angel" },
+  { "ar": "رَسُول", "en": "Messenger" },
+  { "ar": "نَبِي", "en": "Prophet" },
+  { "ar": "كِتَاب", "en": "Book – Quran" },
+  { "ar": "يَوْم", "en": "Day" },
+  { "ar": "سَاعَة", "en": "Hour" },
+  { "ar": "نَار", "en": "Fire – Hellfire" },
+  { "ar": "جَنَّة", "en": "Garden – Paradise" },
+  { "ar": "أَرْض", "en": "Earth" },
+  { "ar": "شَمْس", "en": "Sun" },
+  { "ar": "قَمَر", "en": "Moon" },
+  { "ar": "لَيْل", "en": "Night" },
+  { "ar": "نَهَار", "en": "Day (light)" },
+  { "ar": "مَوْت", "en": "Death" },
+  { "ar": "حَيَاة", "en": "Life" },
+  { "ar": "دُنْيَا", "en": "World – Worldly life" },
+  { "ar": "آخِرَة", "en": "Hereafter – End" },
+  { "ar": "حَقّ", "en": "Right – Truth" },
+  { "ar": "بَاطِل", "en": "Falsehood" },
+  { "ar": "نُور", "en": "Light" },
+  { "ar": "ظُلُمَات", "en": "Darkness" },
+  { "ar": "صِرَاط", "en": "Path" },
+  { "ar": "مُسْتَقِيم", "en": "Straight" },
+  { "ar": "رَحْمَة", "en": "Mercy" },
+  { "ar": "عَذَاب", "en": "Punishment – Torment" },
+  { "ar": "لَعْنَة", "en": "Curse" },
+  { "ar": "هُدَى", "en": "Guidance" },
+  { "ar": "ضَلَالَة", "en": "Error – Misguidance" },
+  { "ar": "شِفَاء", "en": "Cure – Healing" },
+  { "ar": "ذِكْر", "en": "Reminder – Quran – Remembrance" },
+  { "ar": "تَوْبَة", "en": "Repentance" },
+  { "ar": "صَلَاة", "en": "Prayer – Salat" },
+  { "ar": "زَكَاة", "en": "Zakat – Charity" },
+  { "ar": "حَجّ", "en": "Pilgrimage" },
+  { "ar": "جِهَاد", "en": "Struggle" },
+  { "ar": "أَهْل", "en": "Family – People" },
+  { "ar": "صَادِقِين", "en": "Truthful ones" },
+  { "ar": "كَذِب", "en": "Lie" },
+  { "ar": "نَفْس", "en": "Self – Individual – Soul" },
+  { "ar": "رُوح", "en": "Spirit" },
+  { "ar": "قُرْآن", "en": "Qur'an" },
+  { "ar": "حِكْمَة", "en": "Wisdom" },
+  { "ar": "مُبِين", "en": "Manifest – Clear" },
+  { "ar": "غَيْر", "en": "Other than" }
+];
+const DEDUPE_SAME_AR_EN = new Set(['أَرْض','شَمْس','قَمَر','قَوْم','خَلَقَ','عَالَمِين','صِرَاط','مُسْتَقِيم','يَوْم','هُدَى','رَسُول','حِكْمَة','نُور','رَحْمَة','لَعْنَة','حَيَاة','بَاطِل']);
+const _all = [...rawDataBook1, ...rawDataBook2, ...rawDataBook3];
+const rawDataAll = _all.filter((w, i) => {
+  if (!DEDUPE_SAME_AR_EN.has(w.ar)) return true;
+  return _all.findIndex(x => x.ar === w.ar) === i;
+});
+
+const STORAGE_KEY = 'mafaheemwords_combined';
+const MODE_KEY = 'mafaheem_combined_mode';
+const LEARN_MODE_KEY = 'mafaheem_learn_mode';
+
+function mergeProgress(fromDb) {
+    if (!fromDb || !fromDb.history) return;
+    Object.keys(fromDb.history).forEach(ar => {
+        if (!db.history[ar] || fromDb.history[ar] > db.history[ar]) db.history[ar] = fromDb.history[ar];
+    });
+    if (fromDb.wrongQueue) fromDb.wrongQueue.forEach(ar => { if (!db.wrongQueue.includes(ar)) db.wrongQueue.push(ar); });
+    if (fromDb.userMeanings) Object.assign(db.userMeanings, fromDb.userMeanings);
+}
+
+let db = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { history: {}, wrongQueue: [], userMeanings: {} };
+if (!localStorage.getItem(STORAGE_KEY)) {
+    const b1 = JSON.parse(localStorage.getItem('mafaheemwords_book1') || '{}');
+    const b2 = JSON.parse(localStorage.getItem('mafaheemwords_book2') || '{}');
+    const b3 = JSON.parse(localStorage.getItem('mafaheemwords_book3') || '{}');
+    mergeProgress(b1); mergeProgress(b2); mergeProgress(b3);
+    save();
+}
+let suggestions = JSON.parse(localStorage.getItem('mafaheem_suggestions')) || [];
+let currentMode = localStorage.getItem(MODE_KEY) || '1';
+if (!['1','2','3','all'].includes(currentMode)) currentMode = '1';
+let currentSet = [];
+let index = 0;
+let state = 'ASKING';
+
+function getRawData() {
+    if (currentMode === '1') return rawDataBook1;
+    if (currentMode === '2') return rawDataBook2;
+    if (currentMode === '3') return rawDataBook3;
+    return rawDataAll;
+}
+
+function getMasteredWords() {
+    const data = getRawData();
+    return data.filter(w => (db.history[w.ar] || 0) >= 2);
+}
+
+function startSession() {
+    const rawData = getRawData();
+    let mastered = getMasteredWords();
+    let mistakes = rawData.filter(w => db.wrongQueue.includes(w.ar));
+    let nonMastered = rawData.filter(w => !db.wrongQueue.includes(w.ar) && (db.history[w.ar] || 0) < 2);
+    let pool = [...mistakes, ...nonMastered.sort(() => Math.random() - 0.5)];
+    if (pool.length === 0) pool = [...rawData].sort(() => Math.random() - 0.5);
+    currentSet = pool.slice(0, Math.min(10, pool.length));
+    if (mastered.length > 0 && currentSet.length > 0 && Math.random() < 0.5) {
+        let slot = Math.floor(Math.random() * currentSet.length);
+        currentSet[slot] = mastered[Math.floor(Math.random() * mastered.length)];
+    }
+    index = 0;
+    updateStats();
+    renderAdmin();
+
+    const learnMode = localStorage.getItem(LEARN_MODE_KEY) || 'do';
+    const studyWords = currentSet.filter(w => (db.history[w.ar] || 0) === 0);
+
+    document.getElementById('session-complete-wrap').style.display = 'none';
+
+    if (learnMode === 'learn_then_test' && studyWords.length > 0) {
+        document.getElementById('word-drill-wrap').style.display = 'none';
+        document.getElementById('study-screen-wrap').style.display = 'block';
+        const listEl = document.getElementById('study-list');
+        listEl.innerHTML = studyWords.map(w => {
+            const multi = /\s*[—–\-]\s*/.test(w.ar) || w.ar.length > 20;
+            return `<div class="study-item"><span class="study-ar ${multi ? 'multi' : ''}">${w.ar}</span><span class="study-en">${w.en}</span></div>`;
+        }).join('');
+        document.getElementById('study-count').textContent = studyWords.length;
+    } else {
+        document.getElementById('study-screen-wrap').style.display = 'none';
+        document.getElementById('word-drill-wrap').style.display = '';
+        renderWord();
+    }
+}
+
+function startTestFromStudy() {
+    document.getElementById('study-screen-wrap').style.display = 'none';
+    document.getElementById('word-drill-wrap').style.display = '';
+    renderWord();
+}
+
+function renderWord() {
+    state = 'ASKING';
+    const word = currentSet[index];
+    if (!word) return;
+    const qEl = document.getElementById('q-word');
+    qEl.innerText = word.ar;
+    const multi = /\s*[—–\-]\s*/.test(word.ar) || word.ar.length > 20;
+    qEl.classList.toggle('multi-word', multi);
+    const inputField = document.getElementById('answer-input');
+    inputField.value = "";
+    inputField.disabled = false;
+    inputField.focus();
+    document.getElementById('feedback-box').style.display = "none";
+    document.getElementById('override-btn').style.display = "none";
+    document.getElementById('action-btn').innerText = "Check Answer";
+    document.getElementById('action-btn').className = "btn-check";
+    document.getElementById('prog').innerText = index + 1 + "/" + currentSet.length;
+}
+
+var TRIVIAL_WORDS = ["they","he","she","it","we","i","you","the","a","an","his","her","its","their","our","your","my","self","one","that","this","these","those","to","for","in","on","at","by","of","is","are","was","were","be","been","have","has","had"];
+
+function checkAnswer() {
+    const userAns = document.getElementById('answer-input').value.trim().toLowerCase();
+    const word = currentSet[index];
+    if (!word) return;
+    if (!userAns && state === 'ASKING') { displayFeedback(false, word, ""); return; }
+    const raw = word.en.toLowerCase();
+    const parenMatches = raw.match(/\([^)]*\)/g);
+    const parenWords = parenMatches ? [...new Set(parenMatches.map(p => p.slice(1,-1).trim().toLowerCase().replace(/\s+/g, ' ')).filter(Boolean))] : [];
+    let validList = raw.replace(/\([^)]*\)/g, '').split(/\s*[\/\u2013\-]\s*/).map(m => m.trim()).filter(Boolean);
+    if (parenWords.length > 0) {
+        const expanded = [];
+        validList.forEach(t => {
+            expanded.push(t);
+            parenWords.forEach(pw => {
+                expanded.push(t + ' ' + pw);   // (X) at end: "you all believe imperative"
+                expanded.push(pw + ' ' + t);   // (X) at start: "he wishes"
+            });
+        });
+        validList = [...new Set(expanded)];
+    }
+    if (db.userMeanings[word.ar]) validList = [...validList, ...db.userMeanings[word.ar].map(m => String(m).toLowerCase().trim())];
+    const isCorrect = validList.some(target => userAns === target);
+    displayFeedback(isCorrect, word, userAns);
+}
+
+function displayFeedback(isCorrect, word, userAns) {
+    state = 'FEEDBACK';
+    document.getElementById('answer-input').disabled = true;
+    const fbox = document.getElementById('feedback-box');
+    fbox.style.display = "block";
+    if (isCorrect) {
+        document.getElementById('fb-status').innerText = "Correct! ✓";
+        fbox.style.background = "#d4edda"; fbox.style.color = "#155724";
+        db.history[word.ar] = (db.history[word.ar] || 0) + 1;
+        db.wrongQueue = db.wrongQueue.filter(a => a !== word.ar);
+    } else {
+        document.getElementById('fb-status').innerText = "Incorrect ✗";
+        fbox.style.background = "#f8d7da"; fbox.style.color = "#721c24";
+        db.history[word.ar] = 0;
+        if (!db.wrongQueue.includes(word.ar)) db.wrongQueue.push(word.ar);
+        if (userAns.length > 0) {
+            const ovr = document.getElementById('override-btn');
+            ovr.style.display = "block";
+            ovr.onclick = (e) => { e.stopPropagation(); proposeMeaning(word.ar, userAns); };
+        }
+    }
+    document.getElementById('fb-meaning').innerText = "Meaning: " + word.en;
+    document.getElementById('action-btn').innerText = "Next (Enter) →";
+    document.getElementById('action-btn').className = "btn-next";
+    save(); updateStats();
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const studyWrap = document.getElementById('study-screen-wrap');
+        if (studyWrap && studyWrap.style.display !== 'none') {
+            document.getElementById('startTestBtn').click();
+            return;
+        }
+        const completeWrap = document.getElementById('session-complete-wrap');
+        if (completeWrap && completeWrap.style.display !== 'none') {
+            document.getElementById('startNewSessionBtn').click();
+            return;
+        }
+        const ovr = document.getElementById('override-btn');
+        if (state === 'ASKING') checkAnswer();
+        else if (ovr.style.display !== 'block' || document.activeElement !== ovr) handleNext();
+    }
+});
+
+function handleNext() {
+    index++;
+    if (index >= currentSet.length) showSessionComplete();
+    else renderWord();
+}
+
+function showSessionComplete() {
+    document.getElementById("session-complete-wrap").style.display = "block";
+    document.getElementById("word-drill-wrap").style.display = "none";
+}
+
+document.getElementById("startNewSessionBtn").onclick = function() {
+    document.getElementById("session-complete-wrap").style.display = "none";
+    document.getElementById("word-drill-wrap").style.display = "";
+    startSession();
+};
+
+document.getElementById('action-btn').onclick = () => {
+    if (state === 'ASKING') checkAnswer();
+    else handleNext();
+};
+
+function proposeMeaning(arabic, suggestion) {
+    document.getElementById('fb-status').innerText = "Added to Dictionary ✓";
+    document.getElementById('feedback-box').style.background = "#fff3cd";
+    document.getElementById('override-btn').style.display = "none";
+    if (!suggestions.some(s => s.ar === arabic && s.ans === suggestion)) {
+        suggestions.push({ ar: arabic, ans: suggestion });
+        localStorage.setItem('mafaheem_suggestions', JSON.stringify(suggestions));
+    }
+    renderAdmin();
+}
+
+function escapeHtml(str) {
+    if (str == null) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+function renderAdmin() {
+    const body = document.getElementById('suggestion-body');
+    body.innerHTML = "";
+    suggestions.forEach((s, i) => {
+        var ar = escapeHtml(s.ar);
+        var ans = escapeHtml(s.ans);
+        body.insertAdjacentHTML('beforeend', '<tr><td>'+ar+'</td><td>'+ans+'</td><td><button onclick="approve('+i+')" style="padding:2px 5px; background:green; color:white; font-size:10px; margin:0; width:auto;">OK</button><button onclick="del('+i+')" style="padding:2px 5px; background:red; color:white; font-size:10px; margin:0; width:auto;">X</button></td></tr>');
+    });
+}
+
+function approve(i) {
+    const s = suggestions[i];
+    if (!db.userMeanings[s.ar]) db.userMeanings[s.ar] = [];
+    db.userMeanings[s.ar].push(s.ans);
+    suggestions.splice(i, 1);
+    localStorage.setItem('mafaheem_suggestions', JSON.stringify(suggestions));
+    save(); renderAdmin();
+}
+
+function del(i) { suggestions.splice(i, 1); localStorage.setItem('mafaheem_suggestions', JSON.stringify(suggestions)); renderAdmin(); }
+
+function updateStats() {
+    const rawData = getRawData();
+    const mastered = rawData.filter(w => (db.history[w.ar] || 0) >= 2).length;
+    document.getElementById('perc').innerText = mastered + "/" + rawData.length;
+    document.getElementById('wrongs').innerText = db.wrongQueue.filter(ar => rawData.some(w => w.ar === ar)).length;
+}
+
+function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+    localStorage.setItem(MODE_KEY, currentMode);
+}
+
+function resetDB() {
+    if (confirm("Clear all your progress?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(MODE_KEY);
+        location.reload();
+    }
+}
+
+function setMode(mode) {
+    currentMode = mode;
+    const sel = document.getElementById('bookSelect');
+    if (sel) sel.value = mode;
+    localStorage.setItem(MODE_KEY, mode);
+    const studyWrap = document.getElementById('study-screen-wrap');
+    if (studyWrap) studyWrap.style.display = 'none';
+    document.getElementById("session-complete-wrap").style.display = "none";
+    document.getElementById("word-drill-wrap").style.display = "";
+    startSession();
+}
+
+const bookSel = document.getElementById('bookSelect');
+if (bookSel) {
+    bookSel.value = currentMode;
+    bookSel.onchange = () => setMode(bookSel.value);
+}
+const modeSel = document.getElementById('modeSelect');
+if (modeSel) {
+    modeSel.value = localStorage.getItem(LEARN_MODE_KEY) || 'do';
+    modeSel.onchange = () => { localStorage.setItem(LEARN_MODE_KEY, modeSel.value); };
+}
+const howToWrap = document.getElementById('howToWrap');
+const howToBtn = document.getElementById('howToBtn');
+if (howToBtn && howToWrap) {
+    howToBtn.onclick = (e) => { e.stopPropagation(); howToWrap.classList.toggle('open'); };
+    howToWrap.onclick = (e) => e.stopPropagation();
+    document.addEventListener('click', () => howToWrap.classList.remove('open'));
+}
+startSession();
+</script>
+
+<div id="update-banner" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); max-width:420px; width:calc(100% - 40px); background:#1e3a5f; color:white; padding:12px 18px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.25); z-index:9999; align-items:center; gap:14px; box-sizing:border-box;">
+  <span style="flex:1; min-width:0;">A new update is available for Mafaheem!</span>
+  <button onclick="prepareUpdate()" style="background:#2d8a5e; color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:600; flex-shrink:0;">Update Now</button>
+</div>
+
+<script>
+(function() {
+  var newWorker;
+  window.prepareUpdate = function() {
+    var b = document.getElementById('update-banner');
+    if (!b) return;
+    if (location.protocol === 'file:') {
+      b.style.display = 'none';
+      return;
+    }
+    if (typeof newWorker !== 'undefined' && newWorker) {
+      newWorker.postMessage({ action: 'skipWaiting' });
+    } else {
+      b.style.display = 'none';
+    }
+  };
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js').then(function(reg) {
+        reg.addEventListener('updatefound', function() {
+          newWorker = reg.installing;
+          newWorker.addEventListener('statechange', function() {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              var el = document.getElementById('update-banner');
+              if (el) { el.style.display = 'flex'; el.style.flexDirection = 'row'; el.style.justifyContent = 'space-between'; el.style.flexWrap = 'wrap'; }
+            }
+          });
+        });
+      }).catch(function() {});
+    });
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+  }
+})();
+</script>
+</body>
+</html>
